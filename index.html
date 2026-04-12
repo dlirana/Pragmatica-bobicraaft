@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pragmática Quest - Bobicraft Edition</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --panel-2:#1f2937;
+      --line:#334155;
+      --text:#e5f0ff;
+      --muted:#94a3b8;
+      --gold:#facc15;
+      --green:#22c55e;
+      --red:#ef4444;
+      --blue:#38bdf8;
+      --violet:#8b5cf6;
+      --orange:#fb923c;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        linear-gradient(rgba(10,12,20,.75), rgba(10,12,20,.85)),
+        radial-gradient(circle at top, #1e293b, #0f172a 55%);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .app{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .title h1{
+      margin:0;
+      font-size:2rem;
+      color:var(--gold);
+      text-shadow:0 0 10px rgba(250,204,21,.2);
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .hud{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 14px;
+      min-width:120px;
+      text-align:center;
+      box-shadow:0 6px 20px rgba(0,0,0,.2);
+    }
+
+    .chip .label{
+      font-size:.8rem;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .chip .value{
+      font-size:1.2rem;
+      font-weight:bold;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 300px 1fr;
+      gap:18px;
+    }
+
+    @media (max-width: 900px){
+      .layout{grid-template-columns:1fr}
+    }
+
+    .panel{
+      background:rgba(17,24,39,.95);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .panel h2{
+      margin-top:0;
+      color:var(--blue);
+      font-size:1.1rem;
+    }
+
+    .levels{
+      display:grid;
+      gap:10px;
+    }
+
+    .level-btn{
+      width:100%;
+      text-align:left;
+      background:var(--panel-2);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .level-btn:hover{transform:translateY(-1px)}
+    .level-btn.active{
+      border-color:var(--gold);
+      box-shadow:0 0 0 2px rgba(250,204,21,.15);
+    }
+    .level-btn.locked{
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
+    .progress-board{
+      margin-top:16px;
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .track{
+      display:flex;
+      gap:6px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    .tile{
+      width:28px;
+      height:28px;
+      border-radius:8px;
+      background:#1e293b;
+      border:1px solid #475569;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.8rem;
+    }
+
+    .tile.done{background:var(--green); color:#052e16; font-weight:bold;}
+    .tile.current{background:var(--gold); color:#3b2f00; font-weight:bold;}
+
+    .game-header{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-bottom:16px;
+    }
+
+    .objective{
+      background:linear-gradient(90deg, rgba(56,189,248,.12), rgba(139,92,246,.12));
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      color:var(--text);
+    }
+
+    .objective small{color:var(--muted); display:block; margin-bottom:4px;}
+
+    .dice-box{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .dice{
+      width:54px;
+      height:54px;
+      border-radius:14px;
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.4rem;
+      font-weight:bold;
+      color:var(--gold);
+    }
+
+    .game-card{
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:20px;
+      background:
+        linear-gradient(180deg, rgba(31,41,55,.98), rgba(17,24,39,.98));
+    }
+
+    .speaker-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .badge{
+      background:#0b1220;
+      border:1px solid var(--line);
+      color:var(--muted);
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:.9rem;
+    }
+
+    .phrase{
+      margin:20px 0 24px;
+      font-size:2rem;
+      text-align:center;
+      padding:24px;
+      border-radius:18px;
+      background:rgba(15,23,42,.9);
+      border:2px solid rgba(250,204,21,.25);
+      color:#fff8cc;
+      font-weight:bold;
+      line-height:1.3;
+    }
+
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    @media (max-width: 700px){
+      .steps{grid-template-columns:1fr}
+    }
+
+    .step{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .step h3{
+      margin:0 0 10px;
+      font-size:1rem;
+      color:var(--gold);
+    }
+
+    .step textarea, .step select{
+      width:100%;
+      border-radius:10px;
+      border:1px solid #475569;
+      background:#0f172a;
+      color:var(--text);
+      padding:10px;
+      font-size:.95rem;
+    }
+
+    textarea{
+      resize:vertical;
+      min-height:90px;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+
+    button{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-size:.95rem;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .primary{background:var(--gold); color:#2f2500;}
+    .secondary{background:var(--blue); color:#082f49;}
+    .danger{background:var(--red); color:white;}
+    .ghost{
+      background:transparent;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+
+    .score-actions{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:18px;
+    }
+
+    @media (max-width:700px){
+      .score-actions{grid-template-columns:repeat(2,1fr)}
+    }
+
+    .score-btn{
+      background:var(--panel-2);
+      color:var(--text);
+      border:1px solid var(--line);
+      padding:14px;
+      border-radius:14px;
+      font-weight:bold;
+    }
+
+    .score-btn:hover{transform:translateY(-1px)}
+    .plus1{border-color:rgba(34,197,94,.4)}
+    .plus2{border-color:rgba(56,189,248,.4)}
+    .plus3{border-color:rgba(139,92,246,.4)}
+    .minus1{border-color:rgba(239,68,68,.4)}
+
+    .feedback{
+      margin-top:16px;
+      padding:14px;
+      border-radius:14px;
+      background:#0b1220;
+      border:1px solid var(--line);
+      color:var(--muted);
+      min-height:56px;
+    }
+
+    .mini{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width:700px){
+      .mini{grid-template-columns:1fr}
+    }
+
+    .legend{
+      font-size:.9rem;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">
+        <h1>🎮 Pragmática Quest: Bobicraft</h1>
+        <div class="subtitle">Detectar → Corregir → Adaptar</div>
+      </div>
+
+      <div class="hud">
+        <div class="chip">
+          <div class="label">Puntos</div>
+          <div class="value" id="points">0</div>
+        </div>
+        <div class="chip">
+          <div class="label">Turno</div>
+          <div class="value" id="turn">1</div>
+        </div>
+        <div class="chip">
+          <div class="label">Nivel</div>
+          <div class="value" id="currentLevelLabel">1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="panel">
+        <h2>🗺️ Niveles</h2>
+        <div class="levels" id="levelList"></div>
+
+        <div class="progress-board">
+          <strong>Progreso del mapa</strong>
+          <div class="track" id="track"></div>
+          <div class="footer-note">
+            Desbloqueos: 5 pts → nivel 2 · 10 pts → nivel 3 · 15 pts → nivel 4 · 20 pts → nivel 5
+          </div>
+        </div>
+
+        <div class="mini">
+          <div class="panel" style="padding:12px;">
+            <h2 style="margin-bottom:8px;">🎯 Objetivos</h2>
+            <div class="legend">
+              + Contexto<br/>
+              + Coherencia<br/>
+              + Relaciones sociales<br/>
+              + Reparación<br/>
+              + PRO combinado
+            </div>
+          </div>
+
+          <div class="panel" style="padding:12px;">
+            <h2 style="margin-bottom:8px;">⭐ Puntuación</h2>
+            <div class="legend">
+              +1 detectar<br/>
+              +2 corregir<br/>
+              +3 adaptar<br/>
+              -1 reintento
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="panel">
+        <div class="game-header">
+          <div class="objective">
+            <small>Objetivo clínico visible</small>
+            <span id="objectiveText">Usar suficiente contexto para que el otro entienda.</span>
+          </div>
+
+          <div class="dice-box">
+            <div class="dice" id="diceValue">🎲</div>
+            <button class="secondary" id="rollBtn">Tirar dado / siguiente turno</button>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <div class="speaker-row">
+            <div class="badge">Mundo: <span id="worldName">Contexto</span></div>
+            <div class="badge">Interlocutor: <span id="actorName">Amigo</span></div>
+          </div>
+
+          <div class="phrase" id="phraseText">“¡Hay un tesoro!”</div>
+
+          <div class="steps">
+            <div class="step">
+              <h3>1. Detectar el error</h3>
+              <textarea id="detectInput" placeholder="¿Qué problema tiene esta frase?"></textarea>
+            </div>
+
+            <div class="step">
+              <h3>2. Corregir la frase</h3>
+              <textarea id="correctInput" placeholder="Escribe una versión mejor."></textarea>
+            </div>
+
+            <div class="step">
+              <h3>3. Adaptarla al interlocutor</h3>
+              <textarea id="adaptInput" placeholder="¿Cómo la dirías a esa persona?"></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="showHintBtn">Ver pista</button>
+            <button class="ghost" id="exampleBtn">Mostrar ejemplo</button>
+            <button class="danger" id="retryBtn">Reintento (-1)</button>
+            <button class="secondary" id="clearBtn">Limpiar respuestas</button>
+          </div>
+
+          <div class="score-actions">
+            <button class="score-btn plus1" id="scoreDetect">+1 Detectar</button>
+            <button class="score-btn plus2" id="scoreCorrect">+2 Corregir</button>
+            <button class="score-btn plus3" id="scoreAdapt">+3 Adaptar</button>
+            <button class="score-btn minus1" id="scoreMinus">-1 Error/Reintento</button>
+          </div>
+
+          <div class="feedback" id="feedback">
+            Bienvenido. Pulsa “Tirar dado / siguiente turno” para empezar.
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const LEVELS = [
+      {
+        id: 1,
+        name: "Contexto",
+        objective: "Usar suficiente contexto para que el otro entienda.",
+        unlockAt: 0
+      },
+      {
+        id: 2,
+        name: "Coherencia",
+        objective: "Hacer el mensaje claro, conectado y comprensible.",
+        unlockAt: 5
+      },
+      {
+        id: 3,
+        name: "Relaciones sociales",
+        objective: "Adaptar la forma de hablar para que suene adecuada y respetuosa.",
+        unlockAt: 10
+      },
+      {
+        id: 4,
+        name: "Reparación",
+        objective: "Aprender a aclarar, reformular o reparar un mensaje cuando falla.",
+        unlockAt: 15
+      },
+      {
+        id: 5,
+        name: "PRO",
+        objective: "Combinar contexto, coherencia, reparación y adaptación al interlocutor.",
+        unlockAt: 20
+      }
+    ];
+
+    const ACTORS = [
+      "amigo",
+      "adulto",
+      "Don Sio",
+      "policía",
+      "desconocido",
+      "rival",
+      "alguien que no sabe nada"
+    ];
+
+    const PHRASES = {
+      "Contexto": [
+        {
+          text: "¡Hay un tesoro!",
+          hint: "Puede faltar información importante: ¿dónde?, ¿qué tesoro?, ¿para quién es relevante?",
+          example: {
+            corrected: "He encontrado un tesoro en la cueva del bosque.",
+            adapted: {
+              amigo: "¡He encontrado un tesoro en la cueva del bosque! ¿Vienes conmigo?",
+              adulto: "Creo que he encontrado algo importante en la cueva del bosque.",
+              "Don Sio": "Don Sio, creo que encontré un tesoro en la cueva del bosque.",
+              "policía": "He encontrado algo valioso en una cueva del bosque y quería avisar.",
+              desconocido: "Creo que hay algo importante en la cueva del bosque.",
+              rival: "He encontrado algo importante en la cueva del bosque.",
+              "alguien que no sabe nada": "He encontrado un tesoro en una cueva del bosque, cerca del pueblo."
+            }
+          }
+        },
+        {
+          text: "Lo encontré ahí",
+          hint: "La palabra 'ahí' puede ser demasiado vaga.",
+          example: {
+            corrected: "Lo encontré detrás de la casa de los aldeanos.",
+            adapted: {
+              amigo: "Lo encontré detrás de la casa de los aldeanos.",
+              adulto: "Lo encontré detrás de la casa de los aldeanos, junto al pozo.",
+              "Don Sio": "Don Sio, lo encontré detrás de la casa de los aldeanos.",
+              "policía": "Lo encontré detrás de la casa de los aldeanos, junto al pozo.",
+              desconocido: "Lo encontré detrás de una casa del pueblo.",
+              rival: "Lo encontré detrás de la casa de los aldeanos.",
+              "alguien que no sabe nada": "Lo encontré detrás de la casa grande del pueblo, al lado del pozo."
+            }
+          }
+        },
+        {
+          text: "Tienes que venir",
+          hint: "Falta explicar por qué y adónde.",
+          example: {
+            corrected: "Tienes que venir al bosque porque he encontrado una pista.",
+            adapted: {
+              amigo: "Ven al bosque, he encontrado una pista.",
+              adulto: "¿Puede venir un momento al bosque? He encontrado una pista importante.",
+              "Don Sio": "Don Sio, venga al bosque, creo que he encontrado una pista.",
+              "policía": "Necesito que venga al bosque; he encontrado una pista importante.",
+              desconocido: "Necesito que alguien venga al bosque por una pista importante.",
+              rival: "Ven al bosque si quieres ver la pista.",
+              "alguien que no sabe nada": "Tienes que venir al bosque, cerca del puente, porque he encontrado una pista."
+            }
+          }
+        }
+      ],
+      "Coherencia": [
+        {
+          text: "Unos vecinos encontraron cosas",
+          hint: "La idea es demasiado ambigua y poco organizada.",
+          example: {
+            corrected: "Unos vecinos encontraron objetos extraños en la mina esta mañana.",
+            adapted: {
+              amigo: "Unos vecinos encontraron objetos extraños en la mina esta mañana.",
+              adulto: "Esta mañana unos vecinos encontraron objetos extraños en la mina.",
+              "Don Sio": "Don Sio, esta mañana unos vecinos encontraron objetos extraños en la mina.",
+              "policía": "Esta mañana unos vecinos encontraron varios objetos extraños en la mina.",
+              desconocido: "Han encontrado objetos extraños en la mina del pueblo.",
+              rival: "Encontraron objetos extraños en la mina esta mañana.",
+              "alguien que no sabe nada": "Esta mañana unos vecinos del pueblo encontraron objetos extraños en la mina."
+            }
+          }
+        },
+        {
+          text: "Esto va a cambiar todo",
+          hint: "¿Qué es 'esto'? ¿Qué va a cambiar exactamente?",
+          example: {
+            corrected: "Este mapa secreto va a cambiar la búsqueda del tesoro porque muestra la entrada real.",
+            adapted: {
+              amigo: "Este mapa secreto lo cambia todo porque muestra la entrada real.",
+              adulto: "Este mapa puede cambiar la búsqueda porque señala la entrada correcta.",
+              "Don Sio": "Don Sio, este mapa puede cambiarlo todo porque indica la entrada real.",
+              "policía": "Este mapa puede cambiar la investigación porque señala la entrada correcta.",
+              desconocido: "Este mapa puede cambiar la situación porque muestra la entrada real.",
+              rival: "Este mapa cambia la búsqueda porque enseña la entrada real.",
+              "alguien que no sabe nada": "Este mapa secreto puede cambiar toda la búsqueda del tesoro porque muestra la entrada real."
+            }
+          }
+        }
+      ],
+      "Relaciones sociales": [
+        {
+          text: "Dímelo ya",
+          hint: "El contenido puede ser válido, pero el tono puede sonar brusco.",
+          example: {
+            corrected: "¿Me lo puedes decir, por favor?",
+            adapted: {
+              amigo: "¿Me lo dices ya? Por favor.",
+              adulto: "¿Podría decírmelo, por favor?",
+              "Don Sio": "Don Sio, ¿me lo puede decir, por favor?",
+              "policía": "¿Podría explicármelo, por favor?",
+              desconocido: "¿Me lo puede decir, por favor?",
+              rival: "¿Me lo vas a decir o no?... mejor: ¿me lo puedes decir, por favor?",
+              "alguien que no sabe nada": "¿Me lo puedes explicar, por favor?"
+            }
+          }
+        },
+        {
+          text: "¿Tú sabes algo o no?",
+          hint: "Puede sonar acusador o poco amable.",
+          example: {
+            corrected: "¿Sabes algo sobre lo que ha pasado?",
+            adapted: {
+              amigo: "¿Sabes algo de lo que ha pasado?",
+              adulto: "¿Sabe algo sobre lo que ha pasado?",
+              "Don Sio": "Don Sio, ¿sabe algo de lo que ha pasado?",
+              "policía": "¿Sabe algo relevante sobre lo ocurrido?",
+              desconocido: "Disculpe, ¿sabe algo de lo que ha pasado?",
+              rival: "¿Sabes algo de esto?",
+              "alguien que no sabe nada": "¿Sabes algo sobre este problema?"
+            }
+          }
+        }
+      ],
+      "Reparación": [
+        {
+          text: "Vale, da igual",
+          hint: "Cerrar el mensaje así puede cortar la comunicación en vez de repararla.",
+          example: {
+            corrected: "Espera, lo explico mejor.",
+            adapted: {
+              amigo: "Espera, te lo explico mejor.",
+              adulto: "Perdón, voy a explicarlo mejor.",
+              "Don Sio": "Don Sio, perdón, se lo explico mejor.",
+              "policía": "Perdón, voy a explicarlo con más claridad.",
+              desconocido: "Perdón, lo explico mejor.",
+              rival: "Vale, espera, lo digo mejor.",
+              "alguien que no sabe nada": "Perdón, empiezo de nuevo y lo explico mejor."
+            }
+          }
+        },
+        {
+          text: "Explícate mejor",
+          hint: "Puede ser útil pedir aclaración, pero conviene hacerlo con una forma más adecuada.",
+          example: {
+            corrected: "No lo he entendido bien, ¿puedes explicarlo de otra manera?",
+            adapted: {
+              amigo: "No te he entendido bien, ¿me lo explicas de otra forma?",
+              adulto: "No lo he entendido bien, ¿podría explicarlo de otra manera?",
+              "Don Sio": "Don Sio, no lo he entendido bien, ¿puede explicarlo de otra manera?",
+              "policía": "No lo he entendido del todo, ¿podría aclararlo?",
+              desconocido: "No lo he entendido bien, ¿me lo puede explicar otra vez?",
+              rival: "No te entendí bien, explícalo de otra manera.",
+              "alguien que no sabe nada": "No lo he entendido, ¿puedes explicarlo con más detalle?"
+            }
+          }
+        }
+      ]
+    };
+
+    let state = {
+      points: 0,
+      turn: 1,
+      currentLevel: 1,
+      currentPhraseObj: null,
+      currentActor: "amigo"
+    };
+
+    const pointsEl = document.getElementById("points");
+    const turnEl = document.getElementById("turn");
+    const currentLevelLabelEl = document.getElementById("currentLevelLabel");
+    const objectiveTextEl = document.getElementById("objectiveText");
+    const worldNameEl = document.getElementById("worldName");
+    const actorNameEl = document.getElementById("actorName");
+    const phraseTextEl = document.getElementById("phraseText");
+    const feedbackEl = document.getElementById("feedback");
+    const diceValueEl = document.getElementById("diceValue");
+    const levelListEl = document.getElementById("levelList");
+    const trackEl = document.getElementById("track");
+
+    const detectInput = document.getElementById("detectInput");
+    const correctInput = document.getElementById("correctInput");
+    const adaptInput = document.getElementById("adaptInput");
+
+    function getUnlockedLevels() {
+      return LEVELS.filter(level => state.points >= level.unlockAt);
+    }
+
+    function getLevelName() {
+      return LEVELS.find(l => l.id === state.currentLevel)?.name || "Contexto";
+    }
+
+    function renderLevels() {
+      levelListEl.innerHTML = "";
+      LEVELS.forEach(level => {
+        const unlocked = state.points >= level.unlockAt;
+        const btn = document.createElement("button");
+        btn.className = "level-btn" + (state.currentLevel === level.id ? " active" : "") + (!unlocked ? " locked" : "");
+        btn.innerHTML = `<strong>Nivel ${level.id}: ${level.name}</strong><br><small>${unlocked ? "Desbloqueado" : "Se desbloquea con " + level.unlockAt + " pts"}</small>`;
+        btn.disabled = !unlocked;
+        btn.addEventListener("click", () => {
+          if (!unlocked) return;
+          state.currentLevel = level.id;
+          updateUI();
+          nextTurn();
+        });
+        levelListEl.appendChild(btn);
+      });
+    }
+
+    function renderTrack() {
+      trackEl.innerHTML = "";
+      for (let i = 1; i <= 10; i++) {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.textContent = i;
+        if (i < state.turn) tile.classList.add("done");
+        if (i === state.turn) tile.classList.add("current");
+        trackEl.appendChild(tile);
+      }
+    }
+
+    function getRandomActor() {
+      return ACTORS[Math.floor(Math.random() * ACTORS.length)];
+    }
+
+    function getRandomPhrase() {
+      const levelName = getLevelName();
+
+      if (levelName === "PRO") {
+        const all = [
+          ...PHRASES["Contexto"].map(x => ({...x, category:"Contexto"})),
+          ...PHRASES["Coherencia"].map(x => ({...x, category:"Coherencia"})),
+          ...PHRASES["Relaciones sociales"].map(x => ({...x, category:"Relaciones sociales"})),
+          ...PHRASES["Reparación"].map(x => ({...x, category:"Reparación"}))
+        ];
+        return all[Math.floor(Math.random() * all.length)];
+      }
+
+      const set = PHRASES[levelName];
+      return {...set[Math.floor(Math.random() * set.length)], category:levelName};
+    }
+
+    function rollDice() {
+      return Math.floor(Math.random() * 6) + 1;
+    }
+
+    function updateUI() {
+      pointsEl.textContent = state.points;
+      turnEl.textContent = state.turn;
+      currentLevelLabelEl.textContent = state.currentLevel;
+      objectiveTextEl.textContent = LEVELS.find(l => l.id === state.currentLevel)?.objective || "";
+      worldNameEl.textContent = getLevelName();
+      actorNameEl.textContent = state.currentActor;
+      phraseTextEl.textContent = state.currentPhraseObj ? `“${state.currentPhraseObj.text}”` : "Pulsa siguiente turno";
+      renderLevels();
+      renderTrack();
+    }
+
+    function clearInputs() {
+      detectInput.value = "";
+      correctInput.value = "";
+      adaptInput.value = "";
+    }
+
+    function nextTurn() {
+      const dice = rollDice();
+      diceValueEl.textContent = dice;
+      state.currentActor = getRandomActor();
+      state.currentPhraseObj = getRandomPhrase();
+      clearInputs();
+      feedbackEl.innerHTML = `
+        Nuevo turno.<br>
+        Interlocutor: <strong>${state.currentActor}</strong><br>
+        Habilidad: <strong>${state.currentPhraseObj.category}</strong>
+      `;
+      updateUI();
+    }
+
+    function changePoints(amount, message) {
+      state.points = Math.max(0, state.points + amount);
+      feedbackEl.innerHTML = message;
+      updateUI();
+    }
+
+    document.getElementById("rollBtn").addEventListener("click", () => {
+      nextTurn();
+    });
+
+    document.getElementById("showHintBtn").addEventListener("click", () => {
+      if (!state.currentPhraseObj) return;
+      feedbackEl.innerHTML = `<strong>Pista:</strong> ${state.currentPhraseObj.hint}`;
+    });
+
+    document.getElementById("exampleBtn").addEventListener("click", () => {
+      if (!state.currentPhraseObj) return;
+      const actor = state.currentActor;
+      const adapted = state.currentPhraseObj.example.adapted[actor] || state.currentPhraseObj.example.corrected;
+      feedbackEl.innerHTML = `
+        <strong>Ejemplo:</strong><br>
+        Corregida: ${state.currentPhraseObj.example.corrected}<br>
+        Adaptada para <strong>${actor}</strong>: ${adapted}
+      `;
+    });
+
+    document.getElementById("retryBtn").addEventListener("click", () => {
+      changePoints(-1, "Se aplica reintento: -1 punto.");
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      clearInputs();
+      feedbackEl.innerHTML = "Respuestas borradas.";
+    });
+
+    document.getElementById("scoreDetect").addEventListener("click", () => {
+      changePoints(1, "Puntuación aplicada: +1 por detectar el error.");
+    });
+
+    document.getElementById("scoreCorrect").addEventListener("click", () => {
+      changePoints(2, "Puntuación aplicada: +2 por corregir la frase.");
+    });
+
+    document.getElementById("scoreAdapt").addEventListener("click", () => {
+      changePoints(3, "Puntuación aplicada: +3 por adaptar al interlocutor.");
+    });
+
+    document.getElementById("scoreMinus").addEventListener("click", () => {
+      changePoints(-1, "Puntuación aplicada: -1 por error o reintento.");
+    });
+
+    updateUI();
+  </script>
+<audio id="bgMusic" loop>
+  <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<button id="musicBtn" style="position:fixed;bottom:20px;right:20px;z-index:999;border:none;border-radius:12px;padding:12px 16px;font-weight:bold;cursor:pointer;">
+  🔊 Música
+</button>
+
+<script>
+  const music = document.getElementById("bgMusic");
+  const musicBtn = document.getElementById("musicBtn");
+  let playing = false;
+
+  musicBtn.addEventListener("click", () => {
+    if (!playing) {
+      music.play();
+      musicBtn.textContent = "🔇 Pausar música";
+      playing = true;
+    } else {
+      music.pause();
+      musicBtn.textContent = "🔊 Música";
+      playing = false;
+    }
+  });
+</script>
+</body>
+</html>
