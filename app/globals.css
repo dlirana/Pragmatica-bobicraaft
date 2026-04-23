@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-mist text-ink antialiased;
+}
+
+.card {
+  @apply rounded-2xl bg-white p-6 shadow-card border border-cloud;
+}
+
+.cta {
+  @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-base font-semibold transition-all duration-200 ease-smooth;
+}
+
+.cta-primary {
+  @apply cta bg-sage text-ink hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skysoft;
+}
+
+.cta-secondary {
+  @apply cta bg-cloud text-ink hover:bg-stone;
+}
